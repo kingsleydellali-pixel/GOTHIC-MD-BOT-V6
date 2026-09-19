@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: gothic-md-bot
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: SESSION_ID
+        sync: false
+      - key: OWNER_NUMBER
+        sync: false
+      - key: OWNER_NAME
+        value: KINGSLEY-XMD
+      - key: CHANNEL_ID
+        value: 0029Vb6zdPc5vKAAAY0imG2R
+      - key: CHANNEL_REACTIONS
+        value: "❤️,🔥,💯,⚡,🎯,💀,👑,🚀"
+      - key: PREFIX
+        value: "."
+      - key: BOT_NAME
+        value: GOTHIC MD BOT
+      - key: BOT_IMAGE
+        value: https://i.ibb.co/zVyCpvQX/ERFAN-MD.jpg
+      - key: AUTO_JOIN_CHANNEL
+        value: "true"
+      - key: AUTO_REACT_CHANNEL
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
