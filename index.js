@@ -16,8 +16,10 @@ import pino from "pino";
 import express from "express";
 import fs from "fs-extra";
 import path from "path";
+import axios from "axios";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import * as API from "./lib/api.js";
 import settings from "./settings.js";
 
 dotenv.config();
@@ -232,12 +234,12 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
     case "mainmenu": {
       const menuText = `
 ╔══════════════════════════════════════════╗
-║      👑 ${botName} 👑      ║
-║         Made by KINGSLEY-XMD             ║
+║      *👑 ${botName} 👑*      ║
+║         ~Made by KINGSLEY-XMD~             ║
 ╚══════════════════════════════════════════╝
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  📋 MAIN MENU                        ┃
+┃  *📋 MAIN MENU*                        ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
 ┌──────────────────────────────────────┐
@@ -249,7 +251,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  📁 GROUP MENU                       ┃
+┃  *📁 GROUP MENU*                       ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}kick        → Kick a member
@@ -264,7 +266,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  📥 DOWNLOAD MENU                    ┃
+┃  *📥 DOWNLOAD MENU*                    ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}play        → Play song (YouTube)
@@ -279,7 +281,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  🎮 FUN MENU                         ┃
+┃  *🎮 FUN MENU*                         ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}joke        → Random joke
@@ -295,7 +297,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  👑 OWNER MENU                       ┃
+┃  *👑 OWNER MENU*                       ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}restart     → Restart bot
@@ -309,10 +311,11 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 │  ${p}block       → Block a user
 │  ${p}unblock     → Unblock a user
 │  ${p}listblock   → List blocked users
+│  ${p}apistatus        → Checking APIs *Status*
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  🎬 VIDEO MENU                       ┃
+┃  *🎬 VIDEO MENU*                       ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}video       → Download video
@@ -326,7 +329,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  🔧 TOOLS MENU                       ┃
+┃  *🔧 TOOLS MENU*                       ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}sticker     → Image to sticker
@@ -339,12 +342,14 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 │  ${p}weather     → Weather info
 │  ${p}time        → Current time
 │  ${p}date        → Current date
+│  ${p}removebg   → Remove image background
 │  ${p}font        → Fancy fonts
 │  ${p}emojimix    → Mix two emojis
+│  ${p}ocr        → Image to Text
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  🔍 SEARCH MENU                      ┃
+┃  *🔍 SEARCH MENU*                      ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}google      → Google search
@@ -359,7 +364,7 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  ⚙️ SETTINGS MENU                    ┃
+┃  *⚙️ SETTINGS MENU*                    ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}setprefix   → Set bot prefix
@@ -376,12 +381,14 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  🤖 AI MENU                          ┃
+┃  *🤖 AI MENU*                          ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 ┌──────────────────────────────────────┐
 │  ${p}ai          → Chat with AI
 │  ${p}gpt         → Ask GPT anything
 │  ${p}gemini      → Google Gemini AI
+│  ${p}deepseek       → Deep Answers
+│  ${p}groq        → Qroq AI
 │  ${p}imagine     → Generate AI image
 │  ${p}code        → AI code assistant
 │  ${p}summarize   → Summarize text
@@ -392,13 +399,13 @@ async function handleCommand(sock, from, msg, command, args, sender, isGroup) {
 └──────────────────────────────────────┘
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  📢 JOIN OUR CHANNEL                 ┃
+┃  *📢 JOIN OUR CHANNEL*                 ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-${settings.channelLink}
+*${settings.channelLink}*
 
 ╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
-┃  💀 POWERED BY GOTHIC MD BOT          ┃
-┃  👑 MADE BY KINGSLEY-XMD              ┃
+┃  *💀 POWERED BY GOTHIC MD BOT*          ┃
+┃  > 👑 MADE BY KINGSLEY-XMD              ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 `;
 
@@ -640,35 +647,265 @@ Get updates, tips, and support!
     // ==========================================
     //  AI COMMANDS
     // ==========================================
-    case "ai":
-    case "gpt":
-    case "gemini": {
-      const prompt = args.join(" ");
-      if (!prompt) return send(`❌ Usage: ${p}${command} <your question>`);
-      await send(`🤖 *AI RESPONSE*\n━━━━━━━━━━━━━━━━━━\nProcessing: "${prompt}"\n\n(AI API integration required - add your API key in env)`);
-      break;
-    }
+case "ai":
+case "gpt": {
+  const prompt = args.join(" ");
+  if (!prompt) return send(`❌ Usage: ${p}${command} <your question>`);
+  await send("🤖 *Thinking...*");
+  try {
+    const reply = await API.askAI(prompt, command === "gpt" ? "openai" : "auto");
+    await send(`🤖 *AI RESPONSE*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ AI Error: ${err.message}`);
+  }
+  break;
+}
 
-    case "imagine": {
-      const prompt = args.join(" ");
-      if (!prompt) return send("❌ Usage: .imagine <description>");
-      await send(`🎨 *AI IMAGE GENERATOR*\n━━━━━━━━━━━━━━━━━━\nPrompt: "${prompt}"\n\n(Image generation API required)`);
-      break;
-    }
+case "gemini": {
+  const prompt = args.join(" ");
+  if (!prompt) return send("❌ Usage: .gemini <question>");
+  await send("🤖 *Gemini is thinking...*");
+  try {
+    const reply = await API.askGemini(prompt);
+    await send(`✨ *GEMINI AI*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Gemini Error: ${err.message}`);
+  }
+  break;
+}
 
-    case "code": {
-      const prompt = args.join(" ");
-      if (!prompt) return send("❌ Usage: .code <description>");
-      await send(`💻 *AI CODE ASSISTANT*\n━━━━━━━━━━━━━━━━━━\nTask: "${prompt}"\n\n(Code generation API required)`);
-      break;
-    }
+case "groq": {
+  const prompt = args.join(" ");
+  if (!prompt) return send("❌ Usage: .groq <question>");
+  await send("⚡ *Groq is thinking...*");
+  try {
+    const reply = await API.askGroq(prompt);
+    await send(`⚡ *GROQ AI*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Groq Error: ${err.message}`);
+  }
+  break;
+}
 
-    case "summarize": {
-      const text = args.join(" ");
-      if (!text) return send("❌ Usage: .summarize <text>");
-      await send(`📝 *SUMMARIZER*\n━━━━━━━━━━━━━━━━━━\nOriginal: ${text.slice(0, 100)}...\n\n(Summarization API required)`);
-      break;
-    }
+case "deepseek": {
+  const prompt = args.join(" ");
+  if (!prompt) return send("❌ Usage: .deepseek <question>");
+  await send("🧠 *DeepSeek is thinking...*");
+  try {
+    const reply = await API.askDeepSeek(prompt);
+    await send(`🧠 *DEEPSEEK AI*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ DeepSeek Error: ${err.message}`);
+  }
+  break;
+}
+
+case "imagine": {
+  const prompt = args.join(" ");
+  if (!prompt) return send("❌ Usage: .imagine <description>");
+  await send("🎨 *Generating image...*");
+  try {
+    const imgBuffer = await API.generateImage(prompt);
+    await sock.sendMessage(from, { image: imgBuffer, caption: `🎨 *AI IMAGE*\nPrompt: ${prompt}` }, { quoted: msg });
+  } catch (err) {
+    await send(`❌ Image Error: ${err.message}`);
+  }
+  break;
+}
+
+case "code": {
+  const prompt = args.join(" ");
+  if (!prompt) return send("❌ Usage: .code <description>");
+  await send("💻 *Writing code...*");
+  try {
+    const reply = await API.askAI(
+      `You are a code assistant. Write clean, working code for: ${prompt}. Explain briefly.`
+    );
+    await send(`💻 *CODE*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Code Error: ${err.message}`);
+  }
+  break;
+}
+
+case "summarize": {
+  const text = args.join(" ");
+  if (!text) return send("❌ Usage: .summarize <text>");
+  await send("📝 *Summarizing...*");
+  try {
+    const reply = await API.askAI(`Summarize this in 3-5 bullet points:\n\n${text}`);
+    await send(`📝 *SUMMARY*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Summarize Error: ${err.message}`);
+  }
+  break;
+}
+
+case "explain": {
+  const topic = args.join(" ");
+  if (!topic) return send("❌ Usage: .explain <concept>");
+  await send("📚 *Explaining...*");
+  try {
+    const reply = await API.askAI(`Explain clearly and simply: ${topic}`);
+    await send(`📚 *EXPLANATION*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Explain Error: ${err.message}`);
+  }
+  break;
+}
+
+case "story": {
+  const topic = args.join(" ") || "a gothic adventure";
+  await send("📖 *Writing story...*");
+  try {
+    const reply = await API.askAI(`Write a short creative story about: ${topic}`);
+    await send(`📖 *STORY*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Story Error: ${err.message}`);
+  }
+  break;
+}
+
+case "poem": {
+  const topic = args.join(" ") || "darkness and hope";
+  await send("✍️ *Writing poem...*");
+  try {
+    const reply = await API.askAI(`Write a beautiful short poem about: ${topic}`);
+    await send(`✍️ *POEM*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Poem Error: ${err.message}`);
+  }
+  break;
+}
+
+case "email": {
+  const topic = args.join(" ");
+  if (!topic) return send("❌ Usage: .email <topic>");
+  await send("📧 *Writing email...*");
+  try {
+    const reply = await API.askAI(`Write a professional email about: ${topic}`);
+    await send(`📧 *EMAIL*\n━━━━━━━━━━━━━━━━━━\n${reply}`);
+  } catch (err) {
+    await send(`❌ Email Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  WEATHER
+// ==========================================
+case "weather": {
+  const city = args.join(" ");
+  if (!city) return send("❌ Usage: .weather <city>");
+  try {
+    const info = await API.getWeather(city);
+    await send(info);
+  } catch (err) {
+    await send(`❌ Weather Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  NEWS
+// ==========================================
+case "news": {
+  await send("📰 *Fetching news...*");
+  try {
+    const news = await API.getNews();
+    await send(`📰 *LATEST NEWS*\n━━━━━━━━━━━━━━━━━━\n\n${news}`);
+  } catch (err) {
+    await send(`❌ News Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  GOOGLE SEARCH
+// ==========================================
+case "google": {
+  const query = args.join(" ");
+  if (!query) return send("❌ Usage: .google <query>");
+  await send("🔍 *Searching...*");
+  try {
+    const results = await API.googleSearch(query);
+    await send(`🔍 *GOOGLE RESULTS*\n━━━━━━━━━━━━━━━━━━\n\n${results}`);
+  } catch (err) {
+    await send(`❌ Search Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  REMOVE BACKGROUND
+// ==========================================
+case "removebg": {
+  const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+  if (!quoted?.imageMessage) return send("❌ Reply to an image with .removebg");
+  await send("🎨 *Removing background...*");
+  try {
+    // Download image from quote
+    const stream = await sock.downloadMediaMessage({
+      message: quoted,
+      key: msg.key
+    });
+    const imgbbKey = process.env.IMGBB_API_KEY;
+    // Upload to imgbb first
+    const FormData = (await import("form-data")).default;
+    const form = new FormData();
+    form.append("image", stream.toString("base64"));
+    const upload = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${imgbbKey}`,
+      form,
+      { headers: form.getHeaders() }
+    );
+    const imgUrl = upload.data.data.url;
+    const noBg = await API.removeBackground(imgUrl);
+    await sock.sendMessage(from, { image: noBg, caption: "✅ Background removed!" }, { quoted: msg });
+  } catch (err) {
+    await send(`❌ RemoveBG Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  OCR - Image to Text
+// ==========================================
+case "ocr": {
+  const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+  if (!quoted?.imageMessage) return send("❌ Reply to an image with .ocr");
+  await send("🔍 *Extracting text...*");
+  try {
+    const stream = await sock.downloadMediaMessage({ message: quoted, key: msg.key });
+    const FormData = (await import("form-data")).default;
+    const form = new FormData();
+    form.append("image", stream.toString("base64"));
+    const upload = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+      form,
+      { headers: form.getHeaders() }
+    );
+    const imgUrl = upload.data.data.url;
+    const text = await API.ocrImage(imgUrl);
+    await send(`📝 *OCR RESULT*\n━━━━━━━━━━━━━━━━━━\n${text}`);
+  } catch (err) {
+    await send(`❌ OCR Error: ${err.message}`);
+  }
+  break;
+}
+
+// ==========================================
+//  API STATUS (owner)
+// ==========================================
+case "apistatus": {
+  const status = API.getApiStatus();
+  let text = `🔌 *API STATUS*\n━━━━━━━━━━━━━━━━━━\n`;
+  for (const [name, val] of Object.entries(status)) {
+    text += `${name}: ${val}\n`;
+  }
+  await send(text);
+  break;
+}
 
     // ==========================================
     //  SETTINGS COMMANDS
